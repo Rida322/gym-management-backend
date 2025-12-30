@@ -31,20 +31,18 @@ public class ReportsController {
         this.userRepo = userRepo;
     }
 
-    // ================= SUMMARY CARDS =================
     @GetMapping("/summary")
     public ReportsSummary summary(@RequestParam int month,
                                   @RequestParam int year) {
 
-        double totalPayments = paymentRepo.sumPaymentsByMonthYear(month, year);
-        double totalExpenses = expenseRepo.sumExpensesByMonthYear(month, year);
-        double netProfit = totalPayments - totalExpenses;
-        LocalDate today = LocalDate.now();
-        LocalDate start = today.withDayOfMonth(1);
+        LocalDate start = LocalDate.of(year, month, 1);
         LocalDate end = start.plusMonths(1).minusDays(1);
 
-        int newMembers = (int) userRepo.countJoinedBetween(start, end);
+        double totalPayments = paymentRepo.sumPaymentsByMonthYear(start, end);
+        double totalExpenses = expenseRepo.sumExpensesByMonthYear(start, end);
+        double netProfit = totalPayments - totalExpenses;
 
+        int newMembers = (int) userRepo.countJoinedBetween(start, end);
 
         return new ReportsSummary(
                 totalPayments,

@@ -44,15 +44,8 @@ import java.util.List;
         ORDER BY 1
     """)
   List<Object[]> monthlyExpenses(@Param("year") int year);
-  // 💸 Monthly total for reports summary
-  @Query(value = """
-        SELECT COALESCE(SUM(cost),0)
-        FROM expenses
-        WHERE EXTRACT(MONTH FROM expense_date) = :month
-          AND EXTRACT(YEAR FROM expense_date) = :year
-    """, nativeQuery = true)
-  double sumExpensesByMonthYear(@Param("month") int month,
-                                @Param("year") int year);
+
+
 }
 
 
