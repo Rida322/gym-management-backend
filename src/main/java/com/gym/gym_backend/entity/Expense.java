@@ -16,8 +16,8 @@ public class Expense {
 
     private double cost;
 
-    @Column(name = "expense_date")
-    private LocalDate expenseDate;
+    @Column(name = "expense_date", nullable = false)
+    private LocalDate expenseDate = LocalDate.now();   // 🔥 AUTO DATE
 
     // ===== GETTERS & SETTERS =====
 
