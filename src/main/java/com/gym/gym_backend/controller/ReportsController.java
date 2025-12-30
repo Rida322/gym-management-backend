@@ -8,6 +8,7 @@ import com.gym.gym_backend.repo.PaymentRepository;
 import com.gym.gym_backend.repo.UserRepository;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @RestController
@@ -32,16 +33,17 @@ public class ReportsController {
 
     // ================= SUMMARY CARDS =================
     @GetMapping("/summary")
-    public ReportsSummary summary(
-            @RequestParam int month,
-            @RequestParam int year
-    ) {
-        double totalPayments = paymentRepo.sumPaymentsByMonthYear(month, year);
-        double totalExpenses = expenseRepo.sumExpensesByMonthYear(month, year);
+    public ReportsSummary summary(@RequestParam int month,
+                                  @RequestParam int year) {
+
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end = start.plusMonths(1).minusDays(1);
+
+        double totalPayments = paymentRepo.sumPaymentsByMonthYear(start, end);
+        double totalExpenses = expenseRepo.sumExpensesByMonthYear(start, end);
         double netProfit = totalPayments - totalExpenses;
 
-        // ✅ CORRECT SOURCE: USERS TABLE
-        int newMembers = (int) userRepo.countJoinedThisMonth();
+        int newMembers = (int) userRepo.countJoinedThisMonth(start, end);
 
         return new ReportsSummary(
                 totalPayments,
@@ -50,6 +52,7 @@ public class ReportsController {
                 newMembers
         );
     }
+
 
     // ================= CHARTS =================
     @GetMapping("/charts")

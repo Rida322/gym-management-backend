@@ -3,7 +3,9 @@ package com.gym.gym_backend.repo;
 import com.gym.gym_backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,13 +31,12 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     // 🔹 New members this month
     @Query("""
-        SELECT COUNT(u)
-        FROM User u
-        WHERE u.role = 'MEMBER'
-          AND MONTH(u.createdAt) = MONTH(CURRENT_DATE)
-          AND YEAR(u.createdAt) = YEAR(CURRENT_DATE)
-    """)
-    long countJoinedThisMonth();
+    SELECT COUNT(u)
+    FROM User u
+    WHERE u.createdAt BETWEEN :start AND :end
+""")
+    long countJoinedThisMonth(@Param("start") LocalDate start,
+                              @Param("end") LocalDate end);
 
     // ================= MEMBERS + STATUS =================
     // Subscription status is derived from PAYMENTS (NO subscription table)

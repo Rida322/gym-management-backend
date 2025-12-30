@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -24,26 +25,25 @@ import java.util.List;
                                      @Param("year") int year);
 
 
-    @Query(value = """
-        SELECT COALESCE(SUM(cost), 0)
-        FROM expenses
-        WHERE expense_date IS NOT NULL
-          AND EXTRACT(MONTH FROM expense_date) = :month
-          AND EXTRACT(YEAR FROM expense_date) = :year
-    """, nativeQuery = true)
-    Double sumExpensesByMonthYear(@Param("month") int month,
-                                  @Param("year") int year);
+     // 💸 Sum expenses by month/year
+     @Query("""
+    SELECT COALESCE(SUM(e.cost),0)
+    FROM Expense e
+    WHERE e.expenseDate BETWEEN :start AND :end
+""")
+     double sumExpensesByMonthYear(@Param("start") LocalDate start,
+                                   @Param("end") LocalDate end);
 
 
-    @Query(value = """
-        SELECT EXTRACT(MONTH FROM expense_date) AS m, COALESCE(SUM(cost),0) AS total
-        FROM expenses
-        WHERE expense_date IS NOT NULL
-          AND EXTRACT(YEAR FROM expense_date) = :year
-        GROUP BY m
-        ORDER BY m
-    """, nativeQuery = true)
-    List<Object[]> monthlyExpenses(@Param("year") int year);
+     // 📊 Monthly expenses chart
+     @Query("""
+    SELECT EXTRACT(MONTH FROM e.expenseDate), COALESCE(SUM(e.cost),0)
+    FROM Expense e
+    WHERE EXTRACT(YEAR FROM e.expenseDate) = :year
+    GROUP BY EXTRACT(MONTH FROM e.expenseDate)
+    ORDER BY 1
+""")
+     List<Object[]> monthlyExpenses(@Param("year") int year);
 }
 
 
