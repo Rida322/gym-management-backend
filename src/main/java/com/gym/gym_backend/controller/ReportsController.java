@@ -41,16 +41,11 @@ public class ReportsController {
         double totalPayments = paymentRepo.sumPaymentsByMonthYear(start, end);
         double totalExpenses = expenseRepo.sumExpensesByMonthYear(start, end);
         double netProfit = totalPayments - totalExpenses;
-
         int newMembers = (int) userRepo.countJoinedBetween(start, end);
 
-        return new ReportsSummary(
-                totalPayments,
-                totalExpenses,
-                netProfit,
-                newMembers
-        );
+        return new ReportsSummary(totalPayments, totalExpenses, netProfit, newMembers);
     }
+
 
 
 

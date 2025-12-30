@@ -13,39 +13,46 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     // ================= DASHBOARD =================
 
-    @Query(value = """
-        SELECT COALESCE(SUM(amount),0)
-        FROM payments
-        WHERE EXTRACT(MONTH FROM start_date) = EXTRACT(MONTH FROM CURRENT_DATE)
-          AND EXTRACT(YEAR FROM start_date) = EXTRACT(YEAR FROM CURRENT_DATE)
-    """, nativeQuery = true)
+
+    @Query("""
+        SELECT COUNT(DISTINCT p.email)
+        FROM Payment p
+        WHERE CURRENT_DATE BETWEEN p.startDate AND p.endDate
+    """)
+    long countActiveMembers();
+
+    @Query("""
+        SELECT COUNT(DISTINCT p.email)
+        FROM Payment p
+        WHERE p.endDate BETWEEN CURRENT_DATE AND CURRENT_DATE + 7
+    """)
+    long countExpiringSoon();
+
+    @Query("""
+        SELECT COALESCE(SUM(p.amount),0)
+        FROM Payment p
+        WHERE p.startDate >= DATE_TRUNC('month', CURRENT_DATE)
+    """)
     double sumThisMonth();
 
+    // ================= REPORTS =================
 
     @Query("""
-    SELECT COUNT(DISTINCT p.email)
-    FROM Payment p
-    WHERE :today BETWEEN p.startDate AND p.endDate
-""")
-    long countActiveMembers(@Param("today") LocalDate today);
-
-
-    @Query("""
-    SELECT COUNT(DISTINCT p.email)
-    FROM Payment p
-    WHERE p.endDate BETWEEN :today AND :soon
-""")
-    long countExpiringSoon(@Param("today") LocalDate today,
-                           @Param("soon") LocalDate soon);
-
-
-    @Query("""
-    SELECT COALESCE(SUM(p.amount),0)
-    FROM Payment p
-    WHERE p.startDate BETWEEN :start AND :end
-""")
+        SELECT COALESCE(SUM(p.amount),0)
+        FROM Payment p
+        WHERE p.startDate BETWEEN :start AND :end
+    """)
     double sumPaymentsByMonthYear(@Param("start") LocalDate start,
                                   @Param("end") LocalDate end);
+
+    @Query("""
+        SELECT EXTRACT(MONTH FROM p.startDate), COALESCE(SUM(p.amount),0)
+        FROM Payment p
+        WHERE EXTRACT(YEAR FROM p.startDate) = :year
+        GROUP BY EXTRACT(MONTH FROM p.startDate)
+        ORDER BY 1
+    """)
+    List<Object[]> monthlyPayments(@Param("year") int year);
 
 
 
@@ -96,14 +103,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     // ================= REPORTS / CHARTS =================
 
-    // 📊 Monthly payments chart
-    @Query("""
-    SELECT EXTRACT(MONTH FROM p.startDate), COALESCE(SUM(p.amount),0)
-    FROM Payment p
-    WHERE EXTRACT(YEAR FROM p.startDate) = :year
-    GROUP BY EXTRACT(MONTH FROM p.startDate)
-    ORDER BY 1
-""")
-    List<Object[]> monthlyPayments(@Param("year") int year);
+
 
 }
