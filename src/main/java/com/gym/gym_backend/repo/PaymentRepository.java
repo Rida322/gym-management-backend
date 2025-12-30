@@ -13,31 +13,32 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     // ================= DASHBOARD =================
 
-    // 💰 Monthly Revenue
-    @Query("""
-    SELECT COALESCE(SUM(p.amount),0)
-    FROM Payment p
-    WHERE p.startDate >= :startOfMonth
-""")
-    double sumThisMonth(@Param("startOfMonth") LocalDate startOfMonth);
+    @Query(value = """
+        SELECT COALESCE(SUM(amount),0)
+        FROM payments
+        WHERE MONTH(start_date) = MONTH(CURDATE())
+          AND YEAR(start_date) = YEAR(CURDATE())
+    """, nativeQuery = true)
+    double sumThisMonth();
 
     // 👥 Active Members (subscription valid today)
     // 👥 Active Members
-    @Query("""
-    SELECT COUNT(DISTINCT p.email)
-    FROM Payment p
-    WHERE :today BETWEEN p.startDate AND p.endDate
-""")
-    long countActiveMembers(@Param("today") LocalDate today);
 
-    // ⏳ Expiring Soon
-    @Query("""
-    SELECT COUNT(DISTINCT p.email)
-    FROM Payment p
-    WHERE p.endDate BETWEEN :today AND :soon
-""")
-    long countExpiringSoon(@Param("today") LocalDate today,
-                           @Param("soon") LocalDate soon);
+    @Query(value = """
+        SELECT COUNT(DISTINCT email)
+        FROM payments
+        WHERE CURDATE() BETWEEN start_date AND end_date
+    """, nativeQuery = true)
+    long countActiveMembers();
+
+
+    @Query(value = """
+        SELECT COUNT(DISTINCT email)
+        FROM payments
+        WHERE end_date BETWEEN CURDATE()
+          AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+    """, nativeQuery = true)
+    long countExpiringSoon();
 
 
     // ================= PAYMENTS PAGE =================
@@ -97,13 +98,14 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Object[]> monthlyPayments(@Param("year") int year);
 
     // 💰 Sum payments by month/year
-    @Query("""
-    SELECT COALESCE(SUM(p.amount),0)
-    FROM Payment p
-    WHERE p.startDate BETWEEN :start AND :end
-""")
-    double sumPaymentsByMonthYear(@Param("start") LocalDate start,
-                                  @Param("end") LocalDate end);
+    @Query(value = """
+        SELECT COALESCE(SUM(amount),0)
+        FROM payments
+        WHERE MONTH(start_date) = :month
+          AND YEAR(start_date) = :year
+    """, nativeQuery = true)
+    double sumPaymentsByMonthYear(@Param("month") int month,
+                                  @Param("year") int year);
 
 
 }

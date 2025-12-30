@@ -30,13 +30,12 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     long countMembers();
 
     // 🔹 New members this month
-    @Query("""
-    SELECT COUNT(u)
-    FROM User u
-    WHERE u.createdAt BETWEEN :start AND :end
-""")
-    long countJoinedThisMonth(@Param("start") LocalDate start,
-                              @Param("end") LocalDate end);
+    @Query(value = """
+    SELECT COUNT(*)
+    FROM users
+    WHERE DATE_TRUNC('month', joined_at) = DATE_TRUNC('month', CURRENT_DATE)
+""", nativeQuery = true)
+    long countJoinedThisMonth();
 
     // ================= MEMBERS + STATUS =================
     // Subscription status is derived from PAYMENTS (NO subscription table)

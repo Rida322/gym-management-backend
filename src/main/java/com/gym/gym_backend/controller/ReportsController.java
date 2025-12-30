@@ -36,14 +36,10 @@ public class ReportsController {
     public ReportsSummary summary(@RequestParam int month,
                                   @RequestParam int year) {
 
-        LocalDate start = LocalDate.of(year, month, 1);
-        LocalDate end = start.plusMonths(1).minusDays(1);
-
-        double totalPayments = paymentRepo.sumPaymentsByMonthYear(start, end);
-        double totalExpenses = expenseRepo.sumExpensesByMonthYear(start, end);
+        double totalPayments = paymentRepo.sumPaymentsByMonthYear(month, year);
+        double totalExpenses = expenseRepo.sumExpensesByMonthYear(month, year);
         double netProfit = totalPayments - totalExpenses;
-
-        int newMembers = (int) userRepo.countJoinedThisMonth(start, end);
+        int newMembers = (int) userRepo.countJoinedThisMonth();
 
         return new ReportsSummary(
                 totalPayments,
@@ -52,6 +48,8 @@ public class ReportsController {
                 newMembers
         );
     }
+
+
 
 
     // ================= CHARTS =================
