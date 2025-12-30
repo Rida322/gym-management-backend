@@ -65,16 +65,19 @@ public class MembersController {
                 .toList();
     }
 
-    // ================= DASHBOARD STATS =================
     @GetMapping("/stats")
     public StatsResponse getStats() {
 
-        long total = userRepository.countByRole("MEMBER");
-        long active = paymentRepository.countActiveMembers();
-        long expiring = paymentRepository.countExpiringSoon();
-        double revenue = paymentRepository.sumThisMonth();
-        long newThisMonth = userRepository.countJoinedThisMonth();
+        LocalDate today = LocalDate.now();
+        LocalDate soon = today.plusDays(7);
+        LocalDate start = today.withDayOfMonth(1);
+        LocalDate end = start.plusMonths(1).minusDays(1);
 
+        long total = userRepository.countByRole("MEMBER");
+        long active = paymentRepository.countActiveMembers(today);
+        long expiring = paymentRepository.countExpiringSoon(today, soon);
+        double revenue = paymentRepository.sumPaymentsByMonthYear(start, end);
+        long newThisMonth = userRepository.countJoinedBetween(start, end);
 
         return new StatsResponse(
                 total,

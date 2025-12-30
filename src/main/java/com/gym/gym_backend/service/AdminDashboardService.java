@@ -4,6 +4,8 @@ import com.gym.gym_backend.repo.PaymentRepository;
 import com.gym.gym_backend.repo.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
 @Service
 public class AdminDashboardService {
 
@@ -21,18 +23,25 @@ public class AdminDashboardService {
     }
 
     public long activeMembers() {
-        return paymentRepo.countActiveMembers();
+        LocalDate today = LocalDate.now();
+        return paymentRepo.countActiveMembers(today);
     }
 
     public long expiringSoon() {
-        return paymentRepo.countExpiringSoon();
+        LocalDate today = LocalDate.now();
+        LocalDate soon = today.plusDays(7);
+        return paymentRepo.countExpiringSoon(today, soon);
     }
 
     public double monthlyRevenue() {
-        return paymentRepo.sumThisMonth();
+        LocalDate start = LocalDate.now().withDayOfMonth(1);
+        LocalDate end = start.plusMonths(1).minusDays(1);
+        return paymentRepo.sumPaymentsByMonthYear(start, end);
     }
 
     public long newThisMonth() {
-        return userRepo.countJoinedThisMonth();
+        LocalDate start = LocalDate.now().withDayOfMonth(1);
+        LocalDate end = start.plusMonths(1).minusDays(1);
+        return userRepo.countJoinedBetween(start, end);
     }
 }

@@ -55,4 +55,11 @@ public interface UserRepository extends JpaRepository<User, Integer> {
         WHERE u.role = 'MEMBER'
     """, nativeQuery = true)
     List<Object[]> findMembersWithStatus();
+    @Query("""
+    SELECT COUNT(u)
+    FROM User u
+    WHERE u.createdAt BETWEEN :start AND :end
+""")
+    long countJoinedBetween(@Param("start") LocalDate start,
+                            @Param("end") LocalDate end);
 }
