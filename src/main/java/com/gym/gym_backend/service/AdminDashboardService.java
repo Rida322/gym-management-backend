@@ -5,7 +5,6 @@ import com.gym.gym_backend.repo.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Service
 public class AdminDashboardService {
@@ -37,15 +36,10 @@ public class AdminDashboardService {
 
 
     public long newThisMonth() {
-        LocalDateTime start = LocalDate.now()
-                .withDayOfMonth(1)
-                .atStartOfDay();
-
-        LocalDateTime end = start.plusMonths(1).minusSeconds(1);
-
+        LocalDate start = LocalDate.now().withDayOfMonth(1);
+        LocalDate end = start.plusMonths(1).minusDays(1);
         return userRepo.countJoinedBetween(start, end);
     }
-
 
 }
 

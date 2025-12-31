@@ -9,7 +9,6 @@ import com.gym.gym_backend.repo.UserRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
@@ -36,22 +35,16 @@ public class ReportsController {
     public ReportsSummary summary(@RequestParam int month,
                                   @RequestParam int year) {
 
-        LocalDateTime start = LocalDate.of(year, month, 1).atStartOfDay();
-        LocalDateTime end = start.plusMonths(1).minusSeconds(1);
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end = start.plusMonths(1).minusDays(1);
 
-        double totalPayments = paymentRepo.sumPaymentsByMonthYear(
-                start.toLocalDate(), end.toLocalDate());
-
-        double totalExpenses = expenseRepo.sumExpensesByMonthYear(
-                start.toLocalDate(), end.toLocalDate());
-
+        double totalPayments = paymentRepo.sumPaymentsByMonthYear(start, end);
+        double totalExpenses = expenseRepo.sumExpensesByMonthYear(start, end);
         double netProfit = totalPayments - totalExpenses;
-
         int newMembers = (int) userRepo.countJoinedBetween(start, end);
 
         return new ReportsSummary(totalPayments, totalExpenses, netProfit, newMembers);
     }
-
 
 
 

@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,13 +51,13 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     """, nativeQuery = true)
     List<Object[]> findMembersWithStatus();
     @Query(value = """
-SELECT COUNT(*)
-FROM users
-WHERE created_at BETWEEN :start AND :end
+    SELECT COUNT(*)
+    FROM users
+    WHERE created_at >= :start::timestamp
+      AND created_at < (:end + INTERVAL '1 day')::timestamp
 """, nativeQuery = true)
-    long countJoinedBetween(@Param("start") LocalDateTime start,
-                            @Param("end") LocalDateTime end);
-
+    long countJoinedBetween(@Param("start") LocalDate start,
+                            @Param("end") LocalDate end);
 
 
 
