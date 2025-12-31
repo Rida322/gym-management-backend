@@ -34,6 +34,7 @@ public class AdminDashboardService {
         return paymentRepo.sumThisMonth();
     }
 
+
     public long newThisMonth() {
         return userRepo.countJoinedThisMonth();
     }
