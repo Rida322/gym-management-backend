@@ -23,25 +23,19 @@ public class AdminDashboardService {
     }
 
     public long activeMembers() {
-        LocalDate today = LocalDate.now();
-        return paymentRepo.countActiveMembers(today);
+        return paymentRepo.countActiveMembers();
     }
 
     public long expiringSoon() {
-        LocalDate today = LocalDate.now();
-        LocalDate soon = today.plusDays(7);
-        return paymentRepo.countExpiringSoon(today, soon);
+        return paymentRepo.countExpiringSoon();
     }
 
     public double monthlyRevenue() {
-        LocalDate start = LocalDate.now().withDayOfMonth(1);
-        LocalDate end = start.plusMonths(1).minusDays(1);
-        return paymentRepo.sumPaymentsByMonthYear(start, end);
+        return paymentRepo.sumThisMonth();
     }
 
     public long newThisMonth() {
-        LocalDate start = LocalDate.now().withDayOfMonth(1);
-        LocalDate end = start.plusMonths(1).minusDays(1);
-        return userRepo.countJoinedBetween(start, end);
+        return userRepo.countJoinedThisMonth();
     }
 }
+
