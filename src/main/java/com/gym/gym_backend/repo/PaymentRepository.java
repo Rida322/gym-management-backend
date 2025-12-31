@@ -17,18 +17,20 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     @Query(value = """
     SELECT COUNT(DISTINCT email)
     FROM payments
-    WHERE CURRENT_DATE::timestamp
-          BETWEEN start_date AND end_date
+    WHERE CURRENT_DATE BETWEEN start_date AND end_date
 """, nativeQuery = true)
     long countActiveMembers();
+
+
 
     @Query(value = """
     SELECT COUNT(DISTINCT email)
     FROM payments
-    WHERE end_date BETWEEN CURRENT_DATE::timestamp
-        AND (CURRENT_DATE + INTERVAL '7 days')::timestamp
+    WHERE end_date BETWEEN CURRENT_DATE
+    AND CURRENT_DATE + INTERVAL '7 days'
 """, nativeQuery = true)
     long countExpiringSoon();
+
     @Query(value = """
     SELECT COALESCE(SUM(amount),0)
     FROM payments
