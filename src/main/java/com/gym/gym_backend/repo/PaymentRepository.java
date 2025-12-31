@@ -34,9 +34,8 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     @Query(value = """
     SELECT COALESCE(SUM(amount),0)
     FROM payments
-    WHERE start_date BETWEEN
-          DATE_TRUNC('month', CURRENT_DATE)::DATE
-      AND (DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month - 1 day')::DATE
+    WHERE start_date >= DATE_TRUNC('month', CURRENT_DATE)
+      AND start_date <  (DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month')
 """, nativeQuery = true)
     double sumThisMonth();
 
