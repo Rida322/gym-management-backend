@@ -14,26 +14,32 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     // ================= DASHBOARD =================
 
 
+    // ACTIVE MEMBERS
     @Query("""
-        SELECT COUNT(DISTINCT p.email)
-        FROM Payment p
-        WHERE CURRENT_DATE BETWEEN p.startDate AND p.endDate
-    """)
+    SELECT COUNT(DISTINCT p.email)
+    FROM Payment p
+    WHERE CURRENT_DATE BETWEEN p.startDate AND p.endDate
+""")
     long countActiveMembers();
 
+
+    // EXPIRING SOON (next 7 days)
     @Query("""
-        SELECT COUNT(DISTINCT p.email)
-        FROM Payment p
-        WHERE p.endDate BETWEEN CURRENT_DATE AND CURRENT_DATE + 7
-    """)
+    SELECT COUNT(DISTINCT p.email)
+    FROM Payment p
+    WHERE p.endDate BETWEEN CURRENT_DATE AND CURRENT_DATE + 7
+""")
     long countExpiringSoon();
 
+
+    // MONTHLY REVENUE
     @Query("""
-        SELECT COALESCE(SUM(p.amount),0)
-        FROM Payment p
-        WHERE p.startDate >= DATE_TRUNC('month', CURRENT_DATE)
-    """)
+    SELECT COALESCE(SUM(p.amount),0)
+    FROM Payment p
+    WHERE p.startDate >= DATE_TRUNC('month', CURRENT_DATE)
+""")
     double sumThisMonth();
+
 
     // ================= REPORTS =================
 
