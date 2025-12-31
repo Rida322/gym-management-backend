@@ -14,34 +14,35 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     // ================= DASHBOARD =================
 
 
-    // 👥 Active Members
     @Query(value = """
-        SELECT COUNT(DISTINCT email)
-        FROM payments
-        WHERE CURRENT_DATE BETWEEN start_date AND end_date
-    """, nativeQuery = true)
+    SELECT COUNT(DISTINCT email)
+    FROM payments
+    WHERE CURRENT_DATE::timestamp
+          BETWEEN start_date AND end_date
+""", nativeQuery = true)
     long countActiveMembers();
 
 
-    // ⏳ Expiring Soon
+
     @Query(value = """
-        SELECT COUNT(DISTINCT email)
-        FROM payments
-        WHERE end_date BETWEEN CURRENT_DATE
-        AND CURRENT_DATE + INTERVAL '7 days'
-    """, nativeQuery = true)
+    SELECT COUNT(DISTINCT email)
+    FROM payments
+    WHERE end_date BETWEEN CURRENT_DATE::timestamp
+        AND (CURRENT_DATE + INTERVAL '7 days')::timestamp
+""", nativeQuery = true)
     long countExpiringSoon();
+
 
 
 
     @Query(value = """
     SELECT COALESCE(SUM(amount),0)
     FROM payments
-    WHERE start_date BETWEEN
-          DATE_TRUNC('month', CURRENT_DATE)::DATE
-      AND (DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month - 1 day')::DATE
+    WHERE start_date >= date_trunc('month', CURRENT_DATE)
+      AND start_date <  (date_trunc('month', CURRENT_DATE) + INTERVAL '1 month')
 """, nativeQuery = true)
     double sumThisMonth();
+
 
 
     // ================= REPORTS =================

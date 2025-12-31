@@ -53,9 +53,12 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query(value = """
     SELECT COUNT(*)
     FROM users
-    WHERE created_at BETWEEN :start AND :end
+    WHERE created_at >= :start::timestamp
+      AND created_at < (:end + INTERVAL '1 day')::timestamp
 """, nativeQuery = true)
     long countJoinedBetween(@Param("start") LocalDate start,
                             @Param("end") LocalDate end);
+
+
 
 }
