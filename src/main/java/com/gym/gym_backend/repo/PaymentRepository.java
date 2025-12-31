@@ -14,14 +14,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     // ================= DASHBOARD =================
 
 
-    // 💰 Monthly Revenue
-    @Query(value = """
-        SELECT COALESCE(SUM(amount),0)
-        FROM payments
-        WHERE DATE_TRUNC('month', start_date) = DATE_TRUNC('month', CURRENT_DATE)
-    """, nativeQuery = true)
-    double sumThisMonth();
-
     // 👥 Active Members
     @Query(value = """
         SELECT COUNT(DISTINCT email)
@@ -29,6 +21,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
         WHERE CURRENT_DATE BETWEEN start_date AND end_date
     """, nativeQuery = true)
     long countActiveMembers();
+
 
     // ⏳ Expiring Soon
     @Query(value = """
@@ -38,6 +31,27 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
         AND CURRENT_DATE + INTERVAL '7 days'
     """, nativeQuery = true)
     long countExpiringSoon();
+
+
+
+    // 💰 Monthly Revenue
+    @Query(value = """
+        SELECT COALESCE(SUM(amount),0)
+        FROM payments
+        WHERE DATE_TRUNC('month', start_date) = DATE_TRUNC('month', CURRENT_DATE)
+    """, nativeQuery = true)
+    double sumThisMonth();
+
+
+    // ================= REPORTS =================
+
+    @Query("""
+        SELECT COALESCE(SUM(p.amount),0)
+        FROM Payment p
+        WHERE p.startDate BETWEEN :start AND :end
+    """)
+    double sumPaymentsByMonthYear(@Param("start") LocalDate start,
+                                  @Param("end") LocalDate end);
 
     // 📊 Monthly Payments Chart
     @Query(value = """
@@ -49,6 +63,22 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     """, nativeQuery = true)
     List<Object[]> monthlyPayments(int year);
 
+
+
+
+    // ================= PAYMENTS PAGE =================
+
+    @Query(value = """
+        SELECT *
+        FROM payments
+        WHERE MONTH(start_date) = :month
+          AND YEAR(start_date) = :year
+    """, nativeQuery = true)
+    List<Payment> findByMonthAndYear(
+            @Param("month") int month,
+            @Param("year") int year
+    );
+
     @Query("""
         SELECT new com.gym.gym_backend.dto.PaymentReportDto(
             u.name, p.email, p.phoneNumber, p.amount, p.paymentMethod, p.startDate, p.endDate
@@ -57,6 +87,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
         ORDER BY p.startDate DESC
     """)
     List<PaymentReportDto> getPaymentReport();
+
 
     @Query("""
         SELECT p FROM Payment p
