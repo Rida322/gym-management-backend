@@ -22,8 +22,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 """, nativeQuery = true)
     long countActiveMembers();
 
-
-
     @Query(value = """
     SELECT COUNT(DISTINCT email)
     FROM payments
@@ -31,19 +29,14 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
         AND (CURRENT_DATE + INTERVAL '7 days')::timestamp
 """, nativeQuery = true)
     long countExpiringSoon();
-
-
-
-
     @Query(value = """
     SELECT COALESCE(SUM(amount),0)
     FROM payments
     WHERE start_date BETWEEN
-          CAST(date_trunc('month', CURRENT_DATE) AS DATE)
-      AND CAST((date_trunc('month', CURRENT_DATE) + INTERVAL '1 month - 1 day') AS DATE)
+          DATE_TRUNC('month', CURRENT_DATE)::DATE
+      AND (DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month - 1 day')::DATE
 """, nativeQuery = true)
     double sumThisMonth();
-
 
 
     // ================= REPORTS =================

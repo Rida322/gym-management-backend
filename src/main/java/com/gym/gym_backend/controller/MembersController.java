@@ -7,6 +7,7 @@ import com.gym.gym_backend.repo.UserRepository;
 import org.springframework.web.bind.annotation.*;
 import com.gym.gym_backend.dto.StatsResponse;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 @RestController
 @RequestMapping("/api/admin/members")
@@ -72,9 +73,10 @@ public class MembersController {
         long active = paymentRepository.countActiveMembers();
         long expiring = paymentRepository.countExpiringSoon();
         double revenue = paymentRepository.sumThisMonth();
-        LocalDate start = LocalDate.now().withDayOfMonth(1);
-        LocalDate end = start.plusMonths(1).minusDays(1);
+        LocalDateTime start = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime end = start.plusMonths(1).minusSeconds(1);
         long newThisMonth = userRepository.countJoinedBetween(start, end);
+
 
 
         return new StatsResponse(total, active, expiring, revenue, newThisMonth);
