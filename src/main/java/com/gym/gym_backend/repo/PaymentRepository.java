@@ -34,12 +34,13 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
 
 
-    // 💰 Monthly Revenue
     @Query(value = """
-        SELECT COALESCE(SUM(amount),0)
-        FROM payments
-        WHERE DATE_TRUNC('month', start_date) = DATE_TRUNC('month', CURRENT_DATE)
-    """, nativeQuery = true)
+    SELECT COALESCE(SUM(amount),0)
+    FROM payments
+    WHERE start_date BETWEEN
+          DATE_TRUNC('month', CURRENT_DATE)::DATE
+      AND (DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month - 1 day')::DATE
+""", nativeQuery = true)
     double sumThisMonth();
 
 
@@ -69,15 +70,14 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     // ================= PAYMENTS PAGE =================
 
     @Query(value = """
-        SELECT *
-        FROM payments
-        WHERE MONTH(start_date) = :month
-          AND YEAR(start_date) = :year
-    """, nativeQuery = true)
-    List<Payment> findByMonthAndYear(
-            @Param("month") int month,
-            @Param("year") int year
-    );
+    SELECT *
+    FROM payments
+    WHERE EXTRACT(MONTH FROM start_date) = :month
+      AND EXTRACT(YEAR FROM start_date) = :year
+""", nativeQuery = true)
+    List<Payment> findByMonthAndYear(@Param("month") int month,
+                                     @Param("year") int year);
+
 
     @Query("""
         SELECT new com.gym.gym_backend.dto.PaymentReportDto(

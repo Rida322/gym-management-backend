@@ -30,12 +30,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     long countMembers();
 
     // 🔹 New members this month
-    @Query(value = """
-    SELECT COUNT(*)
-    FROM users
-    WHERE DATE_TRUNC('month', joined_at) = DATE_TRUNC('month', CURRENT_DATE)
-""", nativeQuery = true)
-    long countJoinedThisMonth();
+
 
     // ================= MEMBERS + STATUS =================
     // Subscription status is derived from PAYMENTS (NO subscription table)
@@ -55,11 +50,12 @@ public interface UserRepository extends JpaRepository<User, Integer> {
         WHERE u.role = 'MEMBER'
     """, nativeQuery = true)
     List<Object[]> findMembersWithStatus();
-    @Query("""
-    SELECT COUNT(u)
-    FROM User u
-    WHERE u.createdAt BETWEEN :start AND :end
-""")
+    @Query(value = """
+    SELECT COUNT(*)
+    FROM users
+    WHERE created_at BETWEEN :start AND :end
+""", nativeQuery = true)
     long countJoinedBetween(@Param("start") LocalDate start,
                             @Param("end") LocalDate end);
+
 }

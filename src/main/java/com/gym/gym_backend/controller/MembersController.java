@@ -72,7 +72,10 @@ public class MembersController {
         long active = paymentRepository.countActiveMembers();
         long expiring = paymentRepository.countExpiringSoon();
         double revenue = paymentRepository.sumThisMonth();
-        long newThisMonth = userRepository.countJoinedThisMonth();
+        LocalDate start = LocalDate.now().withDayOfMonth(1);
+        LocalDate end = start.plusMonths(1).minusDays(1);
+        long newThisMonth = userRepository.countJoinedBetween(start, end);
+
 
         return new StatsResponse(total, active, expiring, revenue, newThisMonth);
     }

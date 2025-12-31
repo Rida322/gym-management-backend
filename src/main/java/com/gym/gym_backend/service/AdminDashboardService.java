@@ -36,7 +36,10 @@ public class AdminDashboardService {
 
 
     public long newThisMonth() {
-        return userRepo.countJoinedThisMonth();
+        LocalDate start = LocalDate.now().withDayOfMonth(1);
+        LocalDate end = start.plusMonths(1).minusDays(1);
+        return userRepo.countJoinedBetween(start, end);
     }
+
 }
 
